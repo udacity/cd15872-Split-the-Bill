@@ -1,0 +1,47 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { Expense, EvenSplit, ShareSplit } from "../src/models.js";
+const dinner = {
+  id: "dinner",
+  description: "Dinner",
+  payer: "Alex",
+  participants: ["Alex", "Sam", "Jordan"],
+  amountCents: 100,
+};
+
+test("1: save an amount in cents and read it back", () => {
+  const expense = new Expense(dinner);
+  assert.equal(expense.amountCents, 100, "100 cents should be saved as 100");
+  expense.amountCents = 250;
+  assert.equal(
+    expense.amountCents,
+    250,
+    "changing the amount should save 250 cents",
+  );
+});
+test("1: reject a negative amount and keep the previous amount", () => {
+  const expense = new Expense(dinner);
+  assert.throws(() => {
+    expense.amountCents = -1;
+  }, "a negative amount should cause an error");
+  assert.equal(
+    expense.amountCents,
+    100,
+    "an invalid change should leave the original amount alone",
+  );
+});
+test("2: split one dollar equally as 34, 33, and 33 cents", () => {
+  assert.deepEqual(new EvenSplit(dinner).split(), {
+    Alex: 34,
+    Sam: 33,
+    Jordan: 33,
+  });
+});
+test("2: someone with two shares pays twice as much as someone with one", () => {
+  const expense = new ShareSplit({ ...dinner, weights: [1, 2, 1] });
+  assert.deepEqual(expense.split(), { Alex: 25, Sam: 50, Jordan: 25 });
+  assert.ok(
+    expense instanceof Expense,
+    "a share-split expense should still be an Expense",
+  );
+});

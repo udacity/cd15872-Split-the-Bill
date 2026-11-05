@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HooPayz | Split the Bill</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <a href="./" aria-label="HooPayz home"
+        >HooPayz<span> / Split the Bill</span></a
+      >
+      <p>Shared plans. Clear balances.</p>
+    </header>
+    <main>
+      <section class="intro">
+        <p class="eyebrow">THE WEEKEND GROUP</p>
+        <h1>Good times.<br />Every cent accounted for.</h1>
+        <p>
+          Track what everyone paid, choose a fair split, and see where you
+          stand.
+        </p>
+      </section>
+      <p id="status" role="status" aria-live="polite"></p>
+      <section
+        id="summary"
+        aria-label="Group summary"
+        class="summary"
+      ></section>
+      <div class="workspace">
+        <section class="panel">
+          <h2>Add an expense</h2>
+          <form id="expense-form">
+            <label
+              >Description<input
+                name="description"
+                required
+                maxlength="100"
+                placeholder="Dinner by the water"
+            /></label>
+            <div class="pair">
+              <label
+                >Amount (USD)<input
+                  name="amount"
+                  required
+                  inputmode="decimal"
+                  placeholder="48.50" /></label
+              ><label>Paid by<select name="payer" id="payer"></select></label>
+            </div>
+            <div class="pair">
+              <label
+                >Category<select name="category">
+                  <option>Food</option>
+                  <option>Travel</option>
+                  <option>Stay</option>
+                  <option>Activities</option>
+                  <option>Other</option>
+                </select></label
+              ><label
+                >Split method<select name="type" id="split-type">
+                  <option value="even">Evenly</option>
+                  <option value="share">By shares</option>
+                </select></label
+              >
+            </div>
+            <fieldset>
+              <legend>Who's included?</legend>
+              <div id="participants"></div>
+            </fieldset>
+            <label id="weights-label" hidden
+              >Shares<input
+                name="weights"
+                id="weights"
+                placeholder="1, 2, 1"
+                aria-describedby="weights-help"
+              /><small id="weights-help"
+                >Enter whole-number shares in selected participant order. Two
+                shares means twice the cost of one share.</small
+              ></label
+            >
+            <label
+              >Tags<input name="tags" placeholder="weekend, shared"
+            /></label>
+            <button type="submit">
+              Add expense <span aria-hidden="true">↗</span>
+            </button>
+          </form>
+        </section>
+        <section class="panel expenses">
+          <div class="section-heading">
+            <h2>The shared ledger</h2>
+            <span id="expense-count"></span>
+          </div>
+          <div class="filters">
+            <label
+              >Search<input
+                type="search"
+                id="search"
+                placeholder="Find an expense" /></label
+            ><label
+              >Category<select id="category-filter">
+                <option value="">All categories</option>
+                <option>Food</option>
+                <option>Travel</option>
+                <option>Stay</option>
+                <option>Activities</option>
+                <option>Other</option>
+              </select></label
+            ><label
+              >Member<select id="member-filter">
+                <option value="">Everyone</option>
+              </select></label
+            >
+          </div>
+          <p class="hint">
+            Filters affect the ledger. Balances and totals always include all
+            expenses.
+          </p>
+          <div id="ledger"></div>
+          <h3>Spending by category</h3>
+          <div id="categories"></div>
+        </section>
+      </div>
+      <section class="panel">
+        <h2>Everyone's balance</h2>
+        <p class="hint">
+          Positive means they paid more than their share. Negative means they
+          owe the group.
+        </p>
+        <div id="balances" class="balances"></div>
+      </section>
+      <footer>
+        USD only · One group · Data lasts until this page is refreshed
+      </footer>
+    </main>
+    <script type="module" src="src/app.js"></script>
+  </body>
+</html>

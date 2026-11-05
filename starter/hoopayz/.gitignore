@@ -1,0 +1,10 @@
+# Local tools and generated files
+node_modules/
+coverage/
+*.log
+.DS_Store
+
+# Local secrets
+.env
+.env.*
+!.env.example
