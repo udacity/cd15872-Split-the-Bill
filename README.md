@@ -73,8 +73,10 @@ field, and an `amountCents` getter/setter. Each expense has `id`, `description`,
 `payer`, `participants`, `category`, and `amountCents`. Category defaults to `Other`.
 Use `prepareExpense(options)` for public fields and `assertCents(value)` for the
 amount: a positive whole number of cents, up to **$10,000 per expense**.
-Invalid amount changes must leave the previous amount intact.
-Leave the supplied static currency, `shares`, and `toJSON` behavior in place.
+Invalid amount changes must leave the previous amount intact. Ordinary property
+assignment is enough to save the public fields returned by the helper; no
+object-copying utility is required. Leave the supplied static currency,
+`shares`, and `toJSON` behavior in place.
 
 Replace both placeholders with subclasses of `Expense`:
 
@@ -106,7 +108,9 @@ or non-text values, and ignores duplicates.
 Complete `createExpense` by attaching this behavior to the selected expense.
 This is **composition**: combining an expense with tag behavior, rather than
 creating another subclass for every combination. Preserve its class identity
-and split methods. Choose an attachment approach that meets that contract.
+and split methods. Functions can be assigned to object properties just like
+other values. Choose an attachment approach that meets the contract, with
+both tag methods sharing the same private list for that expense.
 
 **Checkpoint:** `npm run test:tags`. Finish classes and tags before the store,
 because its supplied copy helper recreates expenses through `createExpense`.
