@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import createGroup from "../src/group.js";
 import createExpense from "../src/behaviors.js";
-const tea = () =>
+const createTestExpense = () =>
   createExpense({
     id: "tea",
     description: "Tea",
@@ -29,7 +29,7 @@ test("5: state: member inputs and returned arrays cannot change either group", (
 test("5: add: groups keep separate expenses and copy the original expense", () => {
   const first = createGroup(["Alex", "Sam"]);
   const second = createGroup(["Alex", "Sam"]);
-  const original = tea();
+  const original = createTestExpense();
   first.addExpense(original);
   original.amountCents = 900;
   original.participants.push("Outside");
@@ -46,7 +46,7 @@ test("5: add: groups keep separate expenses and copy the original expense", () =
 
 test("5: add: changing a state snapshot cannot change saved data", () => {
   const group = createGroup(["Alex", "Sam"]);
-  group.addExpense(tea());
+  group.addExpense(createTestExpense());
   const state = group.getState();
   state.members.push("Outside");
   state.expenses[0].amountCents = 800;
@@ -65,7 +65,7 @@ test("5: add: changing a state snapshot cannot change saved data", () => {
 
 test("6: lookup: a found expense is an independent copy with working methods", () => {
   const group = createGroup(["Alex", "Sam"]);
-  group.addExpense(tea());
+  group.addExpense(createTestExpense());
   const found = group.findExpense("tea");
   assert.deepEqual(found.split(), { Alex: 50, Sam: 50 });
   found.amountCents = 800;
