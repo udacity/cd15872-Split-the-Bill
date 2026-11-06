@@ -2,56 +2,68 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import createGroup from "../src/group.js";
 import createExpense from "../src/behaviors.js";
-const tea = () =>
+const tea = (id = "tea") =>
   createExpense({
-    id: "tea",
+    id,
     description: "Tea",
     payer: "Alex",
     participants: ["Alex", "Sam"],
     amountCents: 100,
   });
 
-test("5: check whether an expense has already been added", () => {
+// Checkpoints A–C do not require subscribe or notification behavior.
+test("5: state: a new group has its members and no expenses", () => {
+  const group = createGroup(["Alex", "Sam"]);
+  assert.deepEqual(group.getState(), {
+    members: ["Alex", "Sam"],
+    expenses: [],
+  });
+});
+
+test("5: add: check whether an expense has already been added and reject duplicates", () => {
   const group = createGroup(["Alex", "Sam"]);
   assert.equal(group.hasExpense("tea"), false);
   group.addExpense(tea());
   assert.equal(group.hasExpense("tea"), true);
-  assert.throws(
-    () => group.addExpense(tea()),
-    "adding the same ID twice should be rejected",
-  );
+  assert.throws(() => group.addExpense(tea()), "reject a duplicate ID");
+  assert.equal(group.getState().expenses.length, 1);
 });
-test("6: find a saved expense by its ID", () => {
+
+test("5: add: reject an outside payer or participant without changing state", () => {
+  const group = createGroup(["Alex", "Sam"]);
+  group.addExpense(tea());
+  for (const changes of [
+    { payer: "Pat" },
+    { participants: ["Alex", "Pat"] },
+  ]) {
+    const outsider = createExpense({ ...tea("outside").toJSON(), ...changes });
+    assert.throws(() => group.addExpense(outsider));
+    assert.deepEqual(group.getState().expenses.map((expense) => expense.id), ["tea"]);
+  }
+});
+
+test("5: add: validate an expense again when saving its copy", () => {
+  const group = createGroup(["Alex", "Sam"]);
+  const invalid = tea();
+  invalid.description = " ";
+  assert.throws(() => group.addExpense(invalid));
+  assert.deepEqual(group.getState().expenses, []);
+});
+
+test("6: lookup: find a saved expense by its ID or return undefined", () => {
   const group = createGroup(["Alex", "Sam"]);
   group.addExpense(tea());
   assert.equal(group.findExpense("tea").description, "Tea");
-  assert.equal(
-    group.findExpense("missing"),
-    undefined,
-    "an unknown ID should have no result",
-  );
+  assert.equal(group.findExpense("missing"), undefined);
 });
-test("6: removing an expense updates the list and tells the page to refresh", () => {
+
+test("6: lookup: remove only the requested expense and report whether anything changed", () => {
   const group = createGroup(["Alex", "Sam"]);
   group.addExpense(tea());
-  let refreshCount = 0;
-  const stopListening = group.subscribe(() => {
-    refreshCount += 1;
-  });
+  group.addExpense(tea("coffee"));
   assert.equal(group.removeExpense("tea"), true);
-  assert.equal(group.getState().expenses.length, 0);
-  assert.equal(
-    refreshCount,
-    1,
-    "a successful removal should notify the page once",
-  );
+  assert.equal(group.hasExpense("tea"), false);
+  assert.deepEqual(group.getState().expenses.map((expense) => expense.id), ["coffee"]);
   assert.equal(group.removeExpense("missing"), false);
-  assert.equal(
-    refreshCount,
-    1,
-    "nothing changed, so another update is unnecessary",
-  );
-  stopListening();
-  group.addExpense(tea());
-  assert.equal(refreshCount, 1);
+  assert.deepEqual(group.getState().expenses.map((expense) => expense.id), ["coffee"]);
 });

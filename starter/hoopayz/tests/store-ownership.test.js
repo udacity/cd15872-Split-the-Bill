@@ -2,68 +2,79 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import createGroup from "../src/group.js";
 import createExpense from "../src/behaviors.js";
-const tea = (id = "tea") =>
+const tea = () =>
   createExpense({
-    id,
+    id: "tea",
     description: "Tea",
     payer: "Alex",
     participants: ["Alex", "Sam"],
     amountCents: 100,
+    type: "share",
+    weights: [1, 1],
+    tags: ["trip"],
   });
-test("5: each new group starts empty and keeps its own expenses", () => {
+
+test("5: state: member inputs and returned arrays cannot change either group", () => {
   const members = ["Alex", "Sam"];
   const first = createGroup(members);
   const second = createGroup(members);
   members.push("Outside");
-  assert.deepEqual(first.getState().members, ["Alex", "Sam"]);
-  assert.deepEqual(first.getState().expenses, []);
-  first.addExpense(tea());
-  assert.equal(second.getState().expenses.length, 0);
+  const state = first.getState();
+  state.members.push("Outside");
+  state.expenses.push("outside");
+  assert.deepEqual(first.getState(), { members: ["Alex", "Sam"], expenses: [] });
+  assert.deepEqual(second.getState(), { members: ["Alex", "Sam"], expenses: [] });
 });
-test("5: changes to the original expense or a returned copy do not change saved data", () => {
-  const group = createGroup(["Alex", "Sam"]);
+
+test("5: add: groups keep separate expenses and copy the original expense", () => {
+  const first = createGroup(["Alex", "Sam"]);
+  const second = createGroup(["Alex", "Sam"]);
   const original = tea();
-  group.addExpense(original);
+  first.addExpense(original);
   original.amountCents = 900;
+  original.participants.push("Outside");
+  original.weights[0] = 50;
+  original.addTag("outside");
+  const saved = first.getState().expenses[0];
+  assert.equal(saved.amountCents, 100);
+  assert.deepEqual(saved.participants, ["Alex", "Sam"]);
+  assert.deepEqual(saved.weights, [1, 1]);
+  assert.deepEqual(saved.getTags(), ["trip"]);
+  assert.deepEqual(saved.split(), { Alex: 50, Sam: 50 });
+  assert.deepEqual(second.getState().expenses, []);
+});
+
+test("5: add: changing a state snapshot cannot change saved data", () => {
+  const group = createGroup(["Alex", "Sam"]);
+  group.addExpense(tea());
   const state = group.getState();
   state.members.push("Outside");
   state.expenses[0].amountCents = 800;
+  state.expenses[0].participants.push("Outside");
+  state.expenses[0].weights[0] = 50;
+  state.expenses[0].addTag("outside");
   state.expenses.length = 0;
-  group.findExpense("tea").addTag("outside");
-  assert.equal(group.findExpense("tea").amountCents, 100);
-  assert.deepEqual(group.findExpense("tea").getTags(), []);
-  assert.deepEqual(group.getState().members, ["Alex", "Sam"]);
+  const saved = group.getState();
+  assert.deepEqual(saved.members, ["Alex", "Sam"]);
+  assert.equal(saved.expenses.length, 1);
+  assert.equal(saved.expenses[0].amountCents, 100);
+  assert.deepEqual(saved.expenses[0].participants, ["Alex", "Sam"]);
+  assert.deepEqual(saved.expenses[0].weights, [1, 1]);
+  assert.deepEqual(saved.expenses[0].getTags(), ["trip"]);
 });
-test("5: adding an expense tells each listener once and stopping a listener works", () => {
-  const group = createGroup(["Alex", "Sam"]);
-  const first = [],
-    second = [];
-  const stop = group.subscribe((state) => first.push(state.expenses.length));
-  group.subscribe((state) => second.push(state.expenses.length));
-  assert.deepEqual(first, [], "subscribing alone does not announce a change");
-  group.addExpense(tea());
-  stop();
-  group.addExpense(tea("coffee"));
-  assert.deepEqual(first, [1]);
-  assert.deepEqual(second, [1, 2]);
-  assert.throws(() => group.subscribe("not a function"));
-});
-test("5: rejected additions do not change the group or tell listeners to refresh", () => {
+
+test("6: lookup: a found expense is an independent copy with working methods", () => {
   const group = createGroup(["Alex", "Sam"]);
   group.addExpense(tea());
-  let calls = 0;
-  group.subscribe(() => {
-    calls += 1;
-  });
-  assert.throws(() => group.addExpense(tea()));
-  const outsider = createExpense({
-    id: "out",
-    description: "Travel",
-    payer: "Pat",
-    participants: ["Pat"],
-    amountCents: 100,
-  });
-  assert.throws(() => group.addExpense(outsider));
-  assert.equal(calls, 0);
-  assert.equal(group.getState().expenses.length, 1);
+  const found = group.findExpense("tea");
+  assert.deepEqual(found.split(), { Alex: 50, Sam: 50 });
+  found.amountCents = 800;
+  found.participants.push("Outside");
+  found.weights[0] = 50;
+  found.addTag("outside");
+  const saved = group.findExpense("tea");
+  assert.equal(saved.amountCents, 100);
+  assert.deepEqual(saved.participants, ["Alex", "Sam"]);
+  assert.deepEqual(saved.weights, [1, 1]);
+  assert.deepEqual(saved.getTags(), ["trip"]);
 });

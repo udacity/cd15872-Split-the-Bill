@@ -26,6 +26,6 @@ export default function createExpense(options) {
   // TASK 4: add the tag behavior to this expense, keeping its class methods.
   // TODO 4: attach tag behavior while preserving the expense class and its methods.
   throw new Error(
-    "Finish 4: combine the expense with Taggable(cleanTags) using Object.assign",
+    "Finish 4: connect tag behavior while keeping the expense class and split methods",
   );
 }

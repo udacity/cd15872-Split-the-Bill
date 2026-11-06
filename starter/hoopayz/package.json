@@ -11,7 +11,7 @@
     "test": "node --test tests/*.test.js",
     "test:models": "node --test tests/models.test.js tests/class-ownership.test.js",
     "test:tags": "node --test tests/tags.test.js",
-    "test:store": "node --test tests/store.test.js tests/store-ownership.test.js",
+    "test:store": "node --test tests/store.test.js tests/store-ownership.test.js tests/store-events.test.js",
     "test:filters": "node --test tests/filters.test.js tests/filter-features.test.js",
     "test:analytics": "node --test tests/analytics.test.js",
     "test:view": "node --test tests/view.test.js",
@@ -20,8 +20,13 @@
     "test:all": "node --test tests/*.test.js tests/provided/*.test.js",
     "test:amount": "node --test --test-name-pattern=\"^1:\" tests/models.test.js",
     "test:private-tags": "node --test --test-name-pattern=\"^3:\" tests/tags.test.js",
-    "test:duplicates": "node --test --test-name-pattern=\"^5:\" tests/store.test.js",
+    "test:duplicates": "node --test --test-name-pattern=\"^5: add: check whether\" tests/store.test.js",
     "test:search": "node --test --test-name-pattern=\"^7:\" tests/filters.test.js",
-    "test:modules": "node --test tests/modules.test.js"
+    "test:modules": "node --test tests/modules.test.js",
+    "test:store:state": "node --test --test-name-pattern=\"^5: state:\" tests/store.test.js tests/store-ownership.test.js",
+    "test:store:add": "node --test --test-name-pattern=\"^5: add:\" tests/store.test.js tests/store-ownership.test.js",
+    "test:store:lookup": "node --test --test-name-pattern=\"^6: lookup:\" tests/store.test.js tests/store-ownership.test.js",
+    "test:store:events": "node --test tests/store-events.test.js",
+    "test:filter-refactor": "node --test tests/filters.test.js"
   }
 }

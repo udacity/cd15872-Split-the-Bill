@@ -2,9 +2,10 @@ import { assertCents, allocateCents } from "./money.js";
 import { prepareExpense, prepareWeights } from "./support.js";
 
 // TASK 1: implement this class using the README's expense contract.
-// Lesson: Extend and Encapsulate JavaScript Classes.
+// Lessons: Build Objects with JavaScript Classes; Extend and Encapsulate JavaScript Classes.
 export class Expense {
   // TODO: declare a private amount field.
+  // PROVIDED static property; no implementation task here.
   static currency = "USD";
   constructor(options) {
     // prepareExpense validates and returns the public fields; assertCents validates amounts.
@@ -47,7 +48,7 @@ export class Expense {
 }
 
 // TASK 2: replace these placeholders with subclasses of Expense.
-// Lesson: Build Objects with JavaScript Classes.
+// Lesson: Extend and Encapsulate JavaScript Classes.
 // Each needs a type getter and split method. ShareSplit also needs a constructor.
 // Use the supplied shares and prepareWeights helpers; do not write rounding code.
 export class EvenSplit {
