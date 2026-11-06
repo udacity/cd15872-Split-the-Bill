@@ -1,4 +1,5 @@
 import { composeFilters } from "./filters.js";
+import { assertExpenseTotal } from "./money.js";
 export { composeFilters, byText, byCategory, byMember } from "./filters.js";
 
 // PROVIDED: apply the combined checks without changing the original list.
@@ -8,6 +9,8 @@ export const filterExpenses = (expenses, ...checks) =>
 // TASK 9: group amounts by category. Each value is in cents.
 // The empty dictionary is supplied; it accepts any category name safely.
 export const totalsByCategory = (expenses) => {
+  // PROVIDED: leave this guard in place before calculating category totals.
+  assertExpenseTotal(expenses);
   // TODO 9: use reduce to add each amountCents to its category total.
   // Start with the supplied empty dictionary. Empty input returns that dictionary.
   // Example: two Food expenses of 100 and 250 cents give { Food: 350 }.
@@ -17,6 +20,7 @@ export const totalsByCategory = (expenses) => {
 
 // PROVIDED: per-person balance calculations. No implementation task here.
 export function summarize(members, expenses) {
+  assertExpenseTotal(expenses);
   return expenses.reduce(
     (summary, expense) => {
       summary.totalCents += expense.amountCents;

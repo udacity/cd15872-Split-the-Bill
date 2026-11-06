@@ -45,3 +45,30 @@ test("2: someone with two shares pays twice as much as someone with one", () => 
     "a share-split expense should still be an Expense",
   );
 });
+
+
+test("2: saved weights survive the supplied JSON-copy interface", () => {
+  const weights = [1, 2, 1];
+  const expense = new ShareSplit({ ...dinner, weights });
+  assert.deepEqual(expense.weights, weights);
+  assert.notEqual(expense.weights, weights);
+  const serialized = expense.toJSON();
+  assert.deepEqual(serialized.weights, [1, 2, 1]);
+  serialized.weights[0] = 9;
+  weights[1] = 9;
+  assert.deepEqual(expense.split(), { Alex: 25, Sam: 50, Jordan: 25 });
+  assert.deepEqual(new ShareSplit(expense.toJSON()).split(), expense.split());
+});
+
+test("1: all expense classes enforce the $10,000 limit without changing a rejected amount", () => {
+  for (const Class of [Expense, EvenSplit, ShareSplit]) {
+    const options = { ...dinner, weights: [1, 2, 1], amountCents: 1_000_000 };
+    const expense = new Class(options);
+    assert.equal(expense.amountCents, 1_000_000);
+    for (const amountCents of [1_000_001, 0, -1, 0.5, NaN, Infinity]) {
+      assert.throws(() => new Class({ ...options, amountCents }), RangeError);
+      assert.throws(() => { expense.amountCents = amountCents; }, RangeError);
+      assert.equal(expense.amountCents, 1_000_000);
+    }
+  }
+});

@@ -67,3 +67,31 @@ test("6: lookup: remove only the requested expense and report whether anything c
   assert.equal(group.removeExpense("missing"), false);
   assert.deepEqual(group.getState().expenses.map((expense) => expense.id), ["coffee"]);
 });
+
+
+test("5: add: accept $100,000, reject one extra cent, and free capacity on removal", () => {
+  const group = createGroup(["Alex", "Sam"]);
+  for (let index = 0; index < 10; index++) {
+    const expense = tea(`large-${index}`);
+    expense.amountCents = index === 9 ? 999_999 : 1_000_000;
+    group.addExpense(expense);
+  }
+  const total = () => group.getState().expenses.reduce((sum, expense) => sum + expense.amountCents, 0);
+  assert.equal(total(), 9_999_999);
+  const penny = tea("penny");
+  penny.amountCents = 1;
+  group.addExpense(penny);
+  assert.equal(total(), 10_000_000);
+  const before = group.getState().expenses.map((expense) => expense.toJSON());
+  const extra = tea("extra");
+  extra.amountCents = 1;
+  assert.throws(() => group.addExpense(extra), {
+    name: "RangeError", message: /Group spending.*\$100,000\.00/,
+  });
+  assert.equal(group.hasExpense("extra"), false);
+  assert.deepEqual(group.getState().expenses.map((expense) => expense.toJSON()), before);
+  assert.equal(group.removeExpense("penny"), true);
+  group.addExpense(extra);
+  assert.equal(group.hasExpense("extra"), true);
+  assert.equal(total(), 10_000_000);
+});

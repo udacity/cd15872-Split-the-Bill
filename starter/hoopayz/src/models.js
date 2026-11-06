@@ -51,6 +51,8 @@ export class Expense {
 // Lesson: Extend and Encapsulate JavaScript Classes.
 // Each needs a type getter and split method. ShareSplit also needs a constructor.
 // Use the supplied shares and prepareWeights helpers; do not write rounding code.
+// ShareSplit must store prepareWeights(...) as this.weights. The supplied toJSON()
+// reads that property so the store can copy and reconstruct weighted expenses.
 export class EvenSplit {
   constructor(options) {
     throw new Error("Finish 2: build the equal-split subclass");

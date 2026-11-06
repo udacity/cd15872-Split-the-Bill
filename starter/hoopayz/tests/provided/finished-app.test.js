@@ -42,3 +42,23 @@ test("finished app: category names such as constructor still have correct totals
     100,
   );
 });
+
+
+test("finished app: summaries keep exact totals and balances up to $100,000", () => {
+  const expenses = Array.from({ length: 10 }, (_, index) => createExpense({
+    id: `large-${index}`, description: "Large expense", payer: "Alex",
+    participants: ["Sam"], amountCents: 1_000_000,
+  }));
+  const penny = createExpense({ ...expenses[0].toJSON(), id: "penny", amountCents: 1 });
+  const result = summarize(["Alex", "Sam"], expenses);
+  assert.equal(result.totalCents, 10_000_000);
+  assert.deepEqual(result.paid, { Alex: 10_000_000, Sam: 0 });
+  assert.deepEqual(result.owed, { Alex: 0, Sam: 10_000_000 });
+  assert.deepEqual(result.balances, { Alex: 10_000_000, Sam: -10_000_000 });
+  assert.throws(() => summarize(["Alex", "Sam"], [...expenses, penny]), {
+    name: "RangeError", message: /Group spending.*\$100,000\.00/,
+  });
+  assert.throws(() => summarize(["Alex", "Sam"], [
+    { ...expenses[0].toJSON(), amountCents: 1_000_001 },
+  ]), RangeError);
+});

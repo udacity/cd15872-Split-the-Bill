@@ -72,7 +72,8 @@ In `src/models.js`, implement `Expense` with a constructor, a private amount
 field, and an `amountCents` getter/setter. Each expense has `id`, `description`,
 `payer`, `participants`, `category`, and `amountCents`. Category defaults to `Other`.
 Use `prepareExpense(options)` for public fields and `assertCents(value)` for the
-amount. Invalid amount changes must leave the previous amount intact.
+amount: a positive whole number of cents, up to **$10,000 per expense**.
+Invalid amount changes must leave the previous amount intact.
 Leave the supplied static currency, `shares`, and `toJSON` behavior in place.
 
 Replace both placeholders with subclasses of `Expense`:
@@ -80,8 +81,10 @@ Replace both placeholders with subclasses of `Expense`:
 - `EvenSplit`: expose a `type` getter returning `even`. Use `map` to give each
   participant one share, then pass those weights to the inherited `shares` helper.
 - `ShareSplit`: expose a `type` getter returning `share`. Initialize inherited
-  fields in its constructor and save validated weights using `prepareWeights`.
-  Its `split` method passes those saved weights to the inherited helper.
+  fields in its constructor. Call `prepareWeights(this.amountCents,
+  this.participants, options.weights)` and save the returned copy as `this.weights`.
+  This property name is required: the supplied `toJSON()` reads it when the store
+  copies expenses. Its `split` method passes `this.weights` to the inherited helper.
 
 Both types use the base class's amount validation. For 100 cents with weights
 `[1, 2, 1]`, the shares are 25, 50, and 25 cents. Rounding is already implemented.
@@ -119,14 +122,18 @@ stages; you implement all six methods and the private state that supports them.
    and copied expenses. Run `npm run test:store:state`.
 2. **Add safely:** `hasExpense(id)` uses `some` to check whether an ID exists.
    `addExpense(expense)` copies and validates the expense, rejects
-   duplicate IDs and unknown group members, and saves it. Invalid additions must
-   leave the store unchanged. Run `npm run test:store:add`.
+   duplicate IDs and unknown group members, and saves it. Before saving, call
+   `assertExpenseTotal` with the saved expenses plus the candidate to reject an
+   group total above **$100,000**. Invalid additions must leave the store unchanged.
+   Run `npm run test:store:add`.
 3. **Find and remove:** `findExpense(id)` uses `find` and returns a copy or
    `undefined`. `removeExpense(id)` uses `filter` and returns `true` when it removes
    an expense, or `false` when the ID is missing. Run `npm run test:store:lookup`.
 4. **Notify listeners:** `subscribe(callback)` rejects non-functions, registers
-   a callback, and returns a function that stops that subscription. Subscribing
-   alone does not notify. Complete notification for successful additions and
+   a callback, and returns a function that stops only that subscription. The same
+   callback may be registered more than once; each registration is independent.
+   Calling an unsubscribe function repeatedly must not stop other registrations.
+   Subscribing alone does not notify. Complete notification for successful additions and
    removals: call each active listener once with a fresh `getState()` result.
    Rejected additions and missing-ID removals do not notify. Run
    `npm run test:store:events`, then `npm run test:store`.
@@ -168,6 +175,7 @@ on the fresh starter. `npm run test:search` isolates text-search behavior.
 In `src/analytics.js`, implement `totalsByCategory(expenses)` using `reduce`.
 Return category names mapped to total cents: Food amounts of 100 and 250 produce
 `{ Food: 350 }`. Use the supplied empty dictionary and return it for empty input.
+Keep the supplied `assertExpenseTotal` guard in place before your reduction.
 Do not change input expenses. Filters affect the visible list, not group totals.
 
 **Checkpoint:** `npm run test:analytics`.
@@ -193,12 +201,27 @@ them, not for rebuilding their internals.
 | Helper                                          | Contract                                                                                                                    |
 | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `prepareExpense(options)`                       | Validate public details, trim description/category, and return fields with copied participants. Throws for invalid details. |
-| `assertCents(value)`                            | Return a positive safe whole-number amount in cents, or throw.                                                              |
+| `assertCents(value)`                            | Return positive whole-number cents up to $10,000 per expense, or throw.                                                              |
+| `assertExpenseTotal(expenses)`                  | Return combined cents (zero for an empty list); reject invalid expenses or a total above $100,000. Call before saving additions. |
 | `prepareWeights(amount, participants, weights)` | Validate the amount/allocation and return copied positive whole-number weights, one per participant, or throw.              |
 | `this.shares(weights)`                          | Return person-to-cents allocations, including leftover cents.                                                               |
 | `prepareMembers(members)`                       | Return a validated, copied, nonempty list of unique members.                                                                |
 | `assertBelongsToGroup(expense, members)`        | Throw if payer or participants are outside the group.                                                                       |
 | `copy(expense)` inside the store                | Recreate an independent expense, including tags and methods.                                                                |
+
+The project allows at most **$10,000 per expense** (`1_000_000` cents) and
+**$100,000 in combined group spending** (`10_000_000` cents). These inclusive
+limits are practical project rules, not JavaScript's maximum values. Both matter:
+many valid expenses can still exceed the group limit. An over-limit addition
+throws a descriptive error before saving or notifying; removing an expense frees
+capacity. Category totals and summaries check the same rules when called directly.
+The supplied formatting helper also handles group totals, zero, and negative balances.
+
+**Context, not an assignment:** JavaScript numbers can round decimal fractions,
+and very large integers can lose precision. The supplied helpers handle money
+precision and rounding; you do not need to implement or explain their internals.
+For optional background, search for “JavaScript floating-point precision”,
+“Number.MAX_SAFE_INTEGER”, or “money integer cents”.
 
 Advanced helper internals are not assessed. Keep app startup synchronous; no
 fetch, promises, external services, or async functions are needed.
@@ -229,7 +252,8 @@ Check the completed app in the browser:
 - [ ] Add `$1.01` with shares 1,2,1: shares are `$0.25`, `$0.51`, `$0.25`; an entered tag appears.
 - [ ] Search for dinner, combine category/person filters, and try no matches. Group totals stay unchanged.
 - [ ] Remove an expense: the list, category totals, and balances update without a reload.
-- [ ] Try zero amount or no participants: feedback appears and no expense is added.
+- [ ] Try zero amount, no participants, or `$10,000.01`: feedback appears and no expense is added.
+- [ ] In an empty group, ten `$10,000` expenses reach `$100,000`; one extra cent is rejected without changing the ledger. Remove an expense, then retry successfully.
 
 Reviewers inspect eight skill areas as well as running the checks:
 

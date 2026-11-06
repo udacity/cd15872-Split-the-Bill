@@ -1,4 +1,5 @@
 import createExpense from "./behaviors.js";
+import { assertExpenseTotal } from "./money.js";
 import { prepareMembers, assertBelongsToGroup } from "./support.js";
 
 // TASKS 5–6: build the store in four checkpoints. See the project README.
@@ -26,7 +27,8 @@ export default function createGroup(initialMembers = []) {
 
   function addExpense(expense) {
     // TODO: copy and validate, reject duplicate IDs, then save the expense.
-    // Invalid additions must leave the store unchanged.
+    // Call assertExpenseTotal with the saved expenses plus the candidate before saving.
+    // Invalid additions, including an over-limit total, must leave the store unchanged.
     throw new Error("Finish 5B: save a valid expense without exposing its data");
   }
 
@@ -47,6 +49,8 @@ export default function createGroup(initialMembers = []) {
   function subscribe(callback) {
     // TODO: validate and register the callback; return an unsubscribe function.
     // Registering a callback does not call it immediately.
+    // The same callback can have multiple subscriptions. Stop only this registration;
+    // calling its unsubscribe function again must not stop any other registration.
     throw new Error("Finish 5D: register a listener and let it stop listening");
   }
 
