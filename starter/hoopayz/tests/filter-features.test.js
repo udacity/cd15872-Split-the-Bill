@@ -12,18 +12,18 @@ const expense = {
   payer: "Alex",
   participants: ["Sam"],
 };
-test("8: choosing a category includes matching expenses and excludes other categories", () => {
+test("8: choosing a category includes matching expenses and excludes other categories [Milestone 4, Task 8]", () => {
   assert.equal(byCategory("Food")(expense), true);
   assert.equal(byCategory("Travel")(expense), false);
   assert.equal(byCategory()(expense), true);
 });
-test("8: choosing a person finds expenses they paid or share", () => {
+test("8: choosing a person finds expenses they paid or share [Milestone 4, Task 8]", () => {
   assert.equal(byMember("Alex")(expense), true);
   assert.equal(byMember("Sam")(expense), true);
   assert.equal(byMember("Jordan")(expense), false);
   assert.equal(byMember()(expense), true);
 });
-test("8: search, category, and person checks work together", () => {
+test("8: search, category, and person checks work together [Milestone 4, Task 8]", () => {
   assert.equal(
     composeFilters(byText("tea"), byCategory("Food"), byMember("Sam"))(expense),
     true,

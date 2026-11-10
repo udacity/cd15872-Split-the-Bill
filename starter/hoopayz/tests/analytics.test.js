@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { totalsByCategory } from "../src/analytics.js";
 
-test("9: add up food and travel costs separately", () => {
+test("9: add up food and travel costs separately [Milestone 4, Task 9]", () => {
   const expenses = [
     { category: "Food", amountCents: 100 },
     { category: "Travel", amountCents: 200 },
@@ -18,12 +18,12 @@ test("9: add up food and travel costs separately", () => {
     "calculating totals should not change an expense",
   );
 });
-test("9: no expenses means no category totals", () => {
+test("9: no expenses means no category totals [Milestone 4, Task 9]", () => {
   assert.deepEqual({ ...totalsByCategory([]) }, {});
 });
 
 
-test("9: category totals accept $100,000 and reject amounts above either project limit", () => {
+test("9: category totals accept $100,000 and reject amounts above either project limit [Milestone 4, Task 9]", () => {
   const expenses = Array.from({ length: 10 }, () => ({ category: "Food", amountCents: 1_000_000 }));
   assert.equal(totalsByCategory(expenses).Food, 10_000_000);
   for (const category of ["Food", "Travel"]) {

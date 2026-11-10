@@ -1,5 +1,5 @@
-// PROVIDED: all HTML rendering and event wiring.
-// YOUR WORK: the one callback-binding statement in connect().
+// PROVIDED: HTML rendering and event wiring, except the marked callback connection.
+// Learner work: Milestone 5, Task 10 in connect().
 import { element } from "../ui/mount.js";
 import { formatMoney } from "./money.js";
 import {
@@ -17,10 +17,9 @@ export default class ExpenseView {
     this.nodes = nodes;
   }
   connect() {
-    // TASK 10: keep this.render connected to this view when called later.
-    // TODO 10: bind this.render to this view, or supply a wrapper with the same effect
+    // TODO [Milestone 5, Task 10]: bind this.render to this view, or supply a wrapper with the same effect
     throw new Error(
-      "Finish 10: bind this.render to this view, or supply a wrapper with the same effect",
+      "Finish Milestone 5, Task 10: bind this.render to this view, or supply a wrapper with the same effect",
     );
     const unsubscribe = this.group.subscribe(this.render);
     ["search", "category-filter", "member-filter"].forEach((id) =>

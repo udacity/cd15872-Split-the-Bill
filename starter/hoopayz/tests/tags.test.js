@@ -3,14 +3,14 @@ import assert from "node:assert/strict";
 import createExpense, { Taggable } from "../src/behaviors.js";
 import { EvenSplit, ShareSplit } from "../src/models.js";
 
-test("3: add a tag, trim spaces, and ignore duplicate tags", () => {
+test("3: add a tag, trim spaces, and ignore duplicate tags [Milestone 2, Task 3]", () => {
   const labels = Taggable(["trip"]);
   labels.addTag(" food ");
   labels.addTag("food");
   assert.deepEqual(labels.getTags(), ["trip", "food"]);
   assert.throws(() => labels.addTag(" "), "an empty tag should be rejected");
 });
-test("3: each expense keeps its own private list of tags", () => {
+test("3: each expense keeps its own private list of tags [Milestone 2, Task 3]", () => {
   const original = ["trip"];
   const first = Taggable(original);
   const second = Taggable();
@@ -28,7 +28,7 @@ test("3: each expense keeps its own private list of tags", () => {
     "another expense should have its own list",
   );
 });
-test("4: an expense can have tags and still split its amount", () => {
+test("4: an expense can have tags and still split its amount [Milestone 2, Task 4]", () => {
   const expense = createExpense({
     id: "tea",
     description: "Tea",
@@ -45,7 +45,7 @@ test("4: an expense can have tags and still split its amount", () => {
   assert.deepEqual(expense.split(), { Alex: 100 });
 });
 
-test("3: reject non-text tags without changing the private list", () => {
+test("3: reject non-text tags without changing the private list [Milestone 2, Task 3]", () => {
   const labels = Taggable(["trip"]);
   for (const value of [null, undefined, 42, {}, []]) {
     assert.throws(() => labels.addTag(value));
@@ -53,7 +53,7 @@ test("3: reject non-text tags without changing the private list", () => {
   }
 });
 
-test("4: a weighted expense keeps its class, tags, and split behavior", () => {
+test("4: a weighted expense keeps its class, tags, and split behavior [Milestone 2, Task 4]", () => {
   const expense = createExpense({
     id: "dinner",
     description: "Dinner",

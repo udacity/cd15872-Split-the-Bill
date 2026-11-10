@@ -1,3 +1,4 @@
+// PROVIDED: app startup and form handling. No learner implementation tasks here.
 import sample from "../data/sample-trip.js";
 import mount, { element } from "../ui/mount.js";
 import createExpense from "./behaviors.js";

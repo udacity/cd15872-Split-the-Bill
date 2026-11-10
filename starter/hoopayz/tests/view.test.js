@@ -4,7 +4,7 @@ import ExpenseView from "../src/view.js";
 
 // Supplied test setup stands in for the page. You do not need to build this setup.
 // This test checks the callback connection without opening a browser.
-test("10: the view remembers which object it belongs to when called later", () => {
+test("10: the view remembers which object it belongs to when called later [Milestone 5, Task 10]", () => {
   let onChange;
   let calls = 0;
   const state = { members: [], expenses: [] };

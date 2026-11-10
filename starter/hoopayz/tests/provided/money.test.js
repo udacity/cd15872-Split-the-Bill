@@ -1,3 +1,5 @@
+// PROVIDED helper checks: run test:setup before learner work. No task to implement here.
+// Large-number cases verify supplied helper internals, not extra learner requirements.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseMoney, allocateCents, formatMoney, assertExpenseTotal } from "../../src/money.js";

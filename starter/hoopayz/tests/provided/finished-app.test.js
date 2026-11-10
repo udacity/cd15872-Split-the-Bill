@@ -1,3 +1,7 @@
+// PROVIDED integration checks: combine completed learner tasks with supplied app code.
+// These are final checks, not a setup check or instructions to change supplied code.
+// Coverage: Milestone 1, Tasks 1–2; Milestone 2, Tasks 3–4;
+// Milestone 3, Tasks 5–6; Milestone 4, Task 9.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import sample from "../../data/sample-trip.js";

@@ -1,4 +1,5 @@
-// Provided interface plumbing. Rendering is provided; callback binding is learner-owned in src/view.js.
+// PROVIDED: DOM setup and element helpers. No learner tasks in this file.
+// The callback connection is Milestone 5, Task 10 in src/view.js.
 export default function mount() {
   const ids = [
     "summary",

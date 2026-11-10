@@ -1,7 +1,10 @@
+// Milestone 3, Tasks 5–6: integration checks for the Notify listeners checkpoint.
+// Finish classes, tags, and all three earlier store checkpoints first.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import createGroup from "../src/group.js";
 import createExpense from "../src/behaviors.js";
+// Supplied fixture: each call creates a fresh expense; the argument changes only its ID.
 const createTestExpense = (id = "tea") =>
   createExpense({
     id,
@@ -11,7 +14,7 @@ const createTestExpense = (id = "tea") =>
     amountCents: 100,
   });
 
-test("5: events: subscribing validates callbacks and does not announce a change", () => {
+test("5: events: subscribing validates callbacks and does not announce a change [Milestone 3, Task 5]", () => {
   const group = createGroup(["Alex", "Sam"]);
   let calls = 0;
   const stop = group.subscribe(() => { calls += 1; });
@@ -20,7 +23,7 @@ test("5: events: subscribing validates callbacks and does not announce a change"
   assert.throws(() => group.subscribe("not a function"));
 });
 
-test("5: events: adding notifies each active listener once and stopping a listener works", () => {
+test("5: events: adding notifies each active listener once and stopping a listener works [Milestone 3, Task 5]", () => {
   const group = createGroup(["Alex", "Sam"]);
   const first = [], second = [];
   const stop = group.subscribe((state) => first.push(state.expenses.length));
@@ -32,7 +35,7 @@ test("5: events: adding notifies each active listener once and stopping a listen
   assert.deepEqual(second, [1, 2]);
 });
 
-test("6: events: removing notifies once, but a missing ID does not notify", () => {
+test("6: events: removing notifies once, but a missing ID does not notify [Milestone 3, Task 6]", () => {
   const group = createGroup(["Alex", "Sam"]);
   group.addExpense(createTestExpense());
   const sizes = [];
@@ -43,7 +46,7 @@ test("6: events: removing notifies once, but a missing ID does not notify", () =
   assert.deepEqual(sizes, [0]);
 });
 
-test("5: events: rejected additions do not change state or notify listeners", () => {
+test("5: events: rejected additions do not change state or notify listeners [Milestone 3, Task 5]", () => {
   const group = createGroup(["Alex", "Sam"]);
   group.addExpense(createTestExpense());
   let calls = 0;
@@ -63,7 +66,7 @@ test("5: events: rejected additions do not change state or notify listeners", ()
   assert.equal(group.getState().expenses.length, 1);
 });
 
-test("5: events: each listener gets a separate snapshot without access to saved data", () => {
+test("5: events: each listener gets a separate snapshot without access to saved data [Milestone 3, Task 5]", () => {
   const group = createGroup(["Alex", "Sam"]);
   group.subscribe((state) => {
     state.members.push("Outside");
@@ -86,7 +89,7 @@ test("5: events: each listener gets a separate snapshot without access to saved 
 });
 
 
-test("5: events: duplicate callback registrations unsubscribe independently and idempotently", () => {
+test("5: events: duplicate callback registrations unsubscribe independently and idempotently [Milestone 3, Task 5]", () => {
   const group = createGroup(["Alex", "Sam"]);
   const sizes = [];
   const callback = (state) => sizes.push(state.expenses.length);
@@ -109,7 +112,7 @@ test("5: events: duplicate callback registrations unsubscribe independently and 
   assert.deepEqual(sizes, [1, 1, 2, 3]);
 });
 
-test("5: events: over-limit expenses and group additions do not change state or notify", () => {
+test("5: events: over-limit expenses and group additions do not change state or notify [Milestone 3, Task 5]", () => {
   const group = createGroup(["Alex", "Sam"]);
   let calls = 0;
   group.subscribe(() => { calls += 1; });

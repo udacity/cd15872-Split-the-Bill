@@ -1,4 +1,4 @@
-// Provided local preview utility, not an assessed course task.
+// PROVIDED: local preview server. No learner implementation tasks here.
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";

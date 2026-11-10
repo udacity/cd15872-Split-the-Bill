@@ -1,23 +1,24 @@
 import { assertCents, allocateCents } from "./money.js";
 import { prepareExpense, prepareWeights } from "./support.js";
 
-// TASK 1: implement this class using the README's expense contract.
+// TODO [Milestone 1, Task 1]: implement this class using the README's expense contract.
 // Lessons: Build Objects with JavaScript Classes; Extend and Encapsulate JavaScript Classes.
 export class Expense {
-  // TODO: declare a private amount field.
-  // PROVIDED static property; no implementation task here.
-  static currency = "USD";
+  // TODO [Milestone 1, Task 1]: declare a private amount field and a static currency property set to USD.
+  // Currency belongs to the class, not to each expense.
   constructor(options) {
-    // prepareExpense validates and returns the public fields; assertCents validates amounts.
+    // TODO [Milestone 1, Task 1]: initialize public fields with prepareExpense and the amount with its setter.
     throw new Error(
-      "Finish 1: create an expense with validated details and a private amount",
+      "Finish Milestone 1, Task 1: create an expense with validated details and a private amount",
     );
   }
   get amountCents() {
-    throw new Error("Finish 1: read the saved amount");
+    // TODO [Milestone 1, Task 1]: return the private amount.
+    throw new Error("Finish Milestone 1, Task 1: read the saved amount");
   }
   set amountCents(value) {
-    throw new Error("Finish 1: validate and save the new amount");
+    // TODO [Milestone 1, Task 1]: use assertCents before changing the private amount.
+    throw new Error("Finish Milestone 1, Task 1: validate and save the new amount");
   }
 
   // PROVIDED: allocation and copying support. Leave these methods in place.
@@ -47,7 +48,7 @@ export class Expense {
   }
 }
 
-// TASK 2: replace these placeholders with subclasses of Expense.
+// TODO [Milestone 1, Task 2]: replace these placeholders with subclasses of Expense.
 // Lesson: Extend and Encapsulate JavaScript Classes.
 // Each needs a type getter and split method. ShareSplit also needs a constructor.
 // Use the supplied shares and prepareWeights helpers; do not write rounding code.
@@ -55,11 +56,11 @@ export class Expense {
 // reads that property so the store can copy and reconstruct weighted expenses.
 export class EvenSplit {
   constructor(options) {
-    throw new Error("Finish 2: build the equal-split subclass");
+    throw new Error("Finish Milestone 1, Task 2: build the equal-split subclass");
   }
 }
 export class ShareSplit {
   constructor(options) {
-    throw new Error("Finish 2: build the share-split subclass");
+    throw new Error("Finish Milestone 1, Task 2: build the share-split subclass");
   }
 }

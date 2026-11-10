@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import createGroup from "../src/group.js";
 import createExpense from "../src/behaviors.js";
+// Supplied fixture: each call creates a fresh expense with its own data.
 const createTestExpense = () =>
   createExpense({
     id: "tea",
@@ -14,7 +15,7 @@ const createTestExpense = () =>
     tags: ["trip"],
   });
 
-test("5: state: member inputs and returned arrays cannot change either group", () => {
+test("5: state: member inputs and returned arrays cannot change either group [Milestone 3, Task 5]", () => {
   const members = ["Alex", "Sam"];
   const first = createGroup(members);
   const second = createGroup(members);
@@ -26,7 +27,7 @@ test("5: state: member inputs and returned arrays cannot change either group", (
   assert.deepEqual(second.getState(), { members: ["Alex", "Sam"], expenses: [] });
 });
 
-test("5: add: groups keep separate expenses and copy the original expense", () => {
+test("5: add: groups keep separate expenses and copy the original expense [Milestone 3, Task 5]", () => {
   const first = createGroup(["Alex", "Sam"]);
   const second = createGroup(["Alex", "Sam"]);
   const original = createTestExpense();
@@ -44,7 +45,7 @@ test("5: add: groups keep separate expenses and copy the original expense", () =
   assert.deepEqual(second.getState().expenses, []);
 });
 
-test("5: add: changing a state snapshot cannot change saved data", () => {
+test("5: add: changing a state snapshot cannot change saved data [Milestone 3, Task 5]", () => {
   const group = createGroup(["Alex", "Sam"]);
   group.addExpense(createTestExpense());
   const state = group.getState();
@@ -63,7 +64,7 @@ test("5: add: changing a state snapshot cannot change saved data", () => {
   assert.deepEqual(saved.expenses[0].getTags(), ["trip"]);
 });
 
-test("6: lookup: a found expense is an independent copy with working methods", () => {
+test("6: lookup: a found expense is an independent copy with working methods [Milestone 3, Task 6]", () => {
   const group = createGroup(["Alex", "Sam"]);
   group.addExpense(createTestExpense());
   const found = group.findExpense("tea");

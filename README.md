@@ -14,7 +14,7 @@ All paths in this table are inside `starter/hoopayz`.
 
 | File               | Your work                                                                                           |
 | ------------------ | --------------------------------------------------------------------------------------------------- |
-| `src/models.js`    | Expense constructor, private amount/accessors, and two subclasses.                                  |
+| `src/models.js`    | Expense constructor, private amount/accessors, static currency, and two subclasses.                 |
 | `src/behaviors.js` | Private tags and composition with an expense. Class selection and initial tag cleanup are supplied. |
 | `src/group.js`     | Private expense/subscriber state and all six public methods.                                        |
 | `src/filters.js`   | Arrow-function refactoring and category/person predicates.                                          |
@@ -22,10 +22,11 @@ All paths in this table are inside `starter/hoopayz`.
 | `src/view.js`      | Keep the correct `this` in the marked callback. Rendering is supplied.                              |
 | `src/tags.js`      | Create this module by extracting your completed tag factory.                                        |
 
-The static `Expense.currency` field, validation/copy helpers in `src/support.js`,
-rounding in `src/money.js`, app startup, forms, HTML, CSS, sample data, tests, and
-local server are supplied. Keep provided helpers and tests intact. You choose
-how to implement the learner code within the contracts below.
+Validation/copy helpers in `src/support.js`, rounding in `src/money.js`, app
+startup, forms, HTML, CSS, sample data, tests, and local server are supplied.
+Keep provided helpers and tests intact. You choose how to implement the learner
+code within the contracts below. Full milestone/task references connect source
+comments and test titles to the task map below.
 
 The required scope is one group, USD, equal or weighted splits, and in-memory data
 that resets on refresh. Accounts, payments, percentage splits, and recurrence
@@ -35,15 +36,16 @@ modules before starting.
 
 ## A route through the project
 
-Allow about 4½ hours: 
-  - Setup: 20 minutes, 
-  - Classes: 50 minutes, 
-  - Tags: 35 minutes, 
-  - Store: 70 minutes,
-  - Filters/Totals: 40 minutes, 
-  - View/Modules: 20 minutes,
-  - Final checks: 35 minutes. 
-These are planning estimates, not measured completion times. Take more time where you need it.
+Allow about 4½ hours:
+
+- Setup: 20 minutes,
+- Classes: 50 minutes,
+- Tags: 35 minutes,
+- Store: 70 minutes,
+- Filters/Totals: 40 minutes,
+- View/Modules: 20 minutes,
+- Final checks: 35 minutes.
+  These are planning estimates, not measured completion times. Take more time where you need it.
 
 ### Set up and run the preview
 
@@ -68,6 +70,8 @@ expected to fail until you implement their tasks; this is not a setup failure.
 
 ### Milestone 1: Model expenses (Tasks 1–2)
 
+#### Task 1: Build Expense
+
 In `src/models.js`, implement `Expense` with a constructor, a private amount
 field, and an `amountCents` getter/setter. Each expense has `id`, `description`,
 `payer`, `participants`, `category`, and `amountCents`. Category defaults to `Other`.
@@ -75,8 +79,17 @@ Use `prepareExpense(options)` for public fields and `assertCents(value)` for the
 amount: a positive whole number of cents, up to **$10,000 per expense**.
 Invalid amount changes must leave the previous amount intact. Ordinary property
 assignment is enough to save the public fields returned by the helper; no
-object-copying utility is required. Leave the supplied static currency,
-`shares`, and `toJSON` behavior in place.
+object-copying utility is required. Leave the supplied `shares` and `toJSON`
+behavior in place.
+
+As part of Task 1, declare a static `currency` property on `Expense` with the
+value `"USD"`. A static property belongs to the class: read it as
+`Expense.currency`, not `expense.currency`. Both subclasses inherit it, so
+there is no need to store it on each expense. Run `npm run test:amount` before
+starting Task 2; it checks the base class amount and currency without needing
+the subclasses.
+
+#### Task 2: Extend Expense
 
 Replace both placeholders with subclasses of `Expense`:
 
@@ -84,7 +97,7 @@ Replace both placeholders with subclasses of `Expense`:
   participant one share, then pass those weights to the inherited `shares` helper.
 - `ShareSplit`: expose a `type` getter returning `share`. Initialize inherited
   fields in its constructor. Call `prepareWeights(this.amountCents,
-  this.participants, options.weights)` and save the returned copy as `this.weights`.
+this.participants, options.weights)` and save the returned copy as `this.weights`.
   This property name is required: the supplied `toJSON()` reads it when the store
   copies expenses. Its `split` method passes `this.weights` to the inherited helper.
 
@@ -94,6 +107,8 @@ Both types use the base class's amount validation. For 100 cents with weights
 **Checkpoint:** `npm run test:models`.
 
 ### Milestone 2: Give each expense private tags (Tasks 3–4)
+
+#### Task 3: Keep tags private
 
 A **factory** is a function that creates and returns an object or function.
 Implement `Taggable(initial = [])` in `src/behaviors.js` as a factory returning
@@ -105,12 +120,19 @@ and returned arrays using spread so callers cannot change the private list.
 Use an arrow function for `getTags`. Adding a tag trims its text, rejects blank
 or non-text values, and ignores duplicates.
 
+#### Task 4: Compose expense behavior
+
 Complete `createExpense` by attaching this behavior to the selected expense.
 This is **composition**: combining an expense with tag behavior, rather than
 creating another subclass for every combination. Preserve its class identity
 and split methods. Functions can be assigned to object properties just like
 other values. Choose an attachment approach that meets the contract, with
 both tag methods sharing the same private list for that expense.
+
+Using `{ ...expense, ...Taggable(tags) }` creates a new plain object. It copies
+the expense's own visible properties, but not its inherited methods, getters and
+setters, or private amount field. Adding the tag methods to the existing expense
+keeps that instance, including its class behavior and private state.
 
 **Checkpoint:** `npm run test:tags`. Finish classes and tags before the store,
 because its supplied copy helper recreates expenses through `createExpense`.
@@ -122,25 +144,31 @@ inside its closure. No public or global arrays should expose them. Every group
 must be independent. The scaffold groups six unfinished method stubs into four
 stages; you implement all six methods and the private state that supports them.
 
-1. **Read state:** `getState()` returns `{ members, expenses }` with copied arrays
-   and copied expenses. Run `npm run test:store:state`.
-2. **Add safely:** `hasExpense(id)` uses `some` to check whether an ID exists.
-   `addExpense(expense)` copies and validates the expense, rejects
-   duplicate IDs and unknown group members, and saves it. Before saving, call
-   `assertExpenseTotal` with the saved expenses plus the candidate to reject an
-   group total above **$100,000**. Invalid additions must leave the store unchanged.
-   Run `npm run test:store:add`.
-3. **Find and remove:** `findExpense(id)` uses `find` and returns a copy or
-   `undefined`. `removeExpense(id)` uses `filter` and returns `true` when it removes
-   an expense, or `false` when the ID is missing. Run `npm run test:store:lookup`.
-4. **Notify listeners:** `subscribe(callback)` rejects non-functions, registers
-   a callback, and returns a function that stops only that subscription. The same
-   callback may be registered more than once; each registration is independent.
-   Calling an unsubscribe function repeatedly must not stop other registrations.
-   Subscribing alone does not notify. Complete notification for successful additions and
-   removals: call each active listener once with a fresh `getState()` result.
-   Rejected additions and missing-ID removals do not notify. Run
-   `npm run test:store:events`, then `npm run test:store`.
+**Task 5: Own store state and subscriptions.** This includes private state,
+`getState`, `hasExpense`, `addExpense`, `subscribe`, and addition notifications.
+**Task 6: Find and remove expenses.** This includes `findExpense`,
+`removeExpense`, and removal notifications. Use the named checkpoints below
+in order; they are smaller checkpoints within these two tasks, not new task numbers.
+
+- **Read state (Task 5):** `getState()` returns `{ members, expenses }` with copied arrays
+  and copied expenses. Run `npm run test:store:state`.
+- **Add safely (Task 5):** `hasExpense(id)` uses `some` to check whether an ID exists.
+  `addExpense(expense)` copies and validates the expense, rejects
+  duplicate IDs and unknown group members, and saves it. Before saving, call
+  `assertExpenseTotal` with the saved expenses plus the candidate to reject a
+  group total above **$100,000**. Invalid additions must leave the store unchanged.
+  Run `npm run test:store:add`.
+- **Find and remove (Task 6):** `findExpense(id)` uses `find` and returns a copy or
+  `undefined`. `removeExpense(id)` uses `filter` and returns `true` when it removes
+  an expense, or `false` when the ID is missing. Run `npm run test:store:lookup`.
+- **Notify listeners (Tasks 5–6):** `subscribe(callback)` rejects non-functions, registers
+  a callback, and returns a function that stops only that subscription. The same
+  callback may be registered more than once; each registration is independent.
+  Calling an unsubscribe function repeatedly must not stop other registrations.
+  Subscribing alone does not notify. Complete notification for successful additions and
+  removals: call each active listener once with a fresh `getState()` result.
+  Rejected additions and missing-ID removals do not notify. Run
+  `npm run test:store:events`, then `npm run test:store`.
 
 The earlier checkpoints focus on state changes; notification behavior must also
 be complete before this milestone is done. Changes to input expenses, returned
@@ -151,6 +179,10 @@ snapshots, or found expenses must never change saved data. Use the supplied
 
 A **predicate** is a function that answers a true/false question about a value.
 Here, a filter factory returns a predicate that checks one expense.
+
+**Task 7: Refactor text search.** Convert `byText` and its returned function.
+**Task 8: Compose and add filters.** Convert `composeFilters`, its returned
+function, and its `every` callback; also implement the two selection filters below.
 
 `byText` and `composeFilters` in `src/filters.js` start as working ordinary
 functions. Run `npm run test:filter-refactor` before changing them. Convert both
@@ -176,6 +208,8 @@ expenses. This is function composition: combining small checks into one check.
 factories. Unlike the refactor-only check, this command is not expected to pass
 on the fresh starter. `npm run test:search` isolates text-search behavior.
 
+#### Task 9: Total categories
+
 In `src/analytics.js`, implement `totalsByCategory(expenses)` using `reduce`.
 Return category names mapped to total cents: Food amounts of 100 and 250 produce
 `{ Food: 350 }`. Use the supplied empty dictionary and return it for empty input.
@@ -186,10 +220,14 @@ Do not change input expenses. Filters affect the visible list, not group totals.
 
 ### Milestone 5: Connect the view and extract a module (Tasks 10–11)
 
+#### Task 10: Connect the view
+
 Complete the marked callback in `ExpenseView.connect` in `src/view.js`. When the
 store calls `render` later, it must retain the view as `this`. Use `bind` or an
 equivalent wrapper. Adding or removing expenses should update the page without
 a reload. Run `npm run test:view`.
+
+#### Task 11: Extract the tag module
 
 Move your completed `Taggable` factory into a new `src/tags.js` with a named
 export. Import and re-export it from `behaviors.js` so existing consumers still
@@ -202,16 +240,16 @@ second factory implementation behind. Run `npm run test:modules`.
 You are responsible for calling these supplied helpers where your code needs
 them, not for rebuilding their internals.
 
-| Helper                                          | Contract                                                                                                                    |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `prepareExpense(options)`                       | Validate public details, trim description/category, and return fields with copied participants. Throws for invalid details. |
-| `assertCents(value)`                            | Return positive whole-number cents up to $10,000 per expense, or throw.                                                              |
+| Helper                                          | Contract                                                                                                                         |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `prepareExpense(options)`                       | Validate public details, trim description/category, and return fields with copied participants. Throws for invalid details.      |
+| `assertCents(value)`                            | Return positive whole-number cents up to $10,000 per expense, or throw.                                                          |
 | `assertExpenseTotal(expenses)`                  | Return combined cents (zero for an empty list); reject invalid expenses or a total above $100,000. Call before saving additions. |
-| `prepareWeights(amount, participants, weights)` | Validate the amount/allocation and return copied positive whole-number weights, one per participant, or throw.              |
-| `this.shares(weights)`                          | Return person-to-cents allocations, including leftover cents.                                                               |
-| `prepareMembers(members)`                       | Return a validated, copied, nonempty list of unique members.                                                                |
-| `assertBelongsToGroup(expense, members)`        | Throw if payer or participants are outside the group.                                                                       |
-| `copy(expense)` inside the store                | Recreate an independent expense, including tags and methods.                                                                |
+| `prepareWeights(amount, participants, weights)` | Validate the amount/allocation and return copied positive whole-number weights, one per participant, or throw.                   |
+| `this.shares(weights)`                          | Return person-to-cents allocations, including leftover cents.                                                                    |
+| `prepareMembers(members)`                       | Return a validated, copied, nonempty list of unique members.                                                                     |
+| `assertBelongsToGroup(expense, members)`        | Throw if payer or participants are outside the group.                                                                            |
+| `copy(expense)` inside the store                | Recreate an independent expense, including tags and methods.                                                                     |
 
 The project allows at most **$10,000 per expense** (`1_000_000` cents) and
 **$100,000 in combined group spending** (`10_000_000` cents). These inclusive
@@ -261,11 +299,13 @@ Check the completed app in the browser:
 
 Reviewers inspect eight skill areas as well as running the checks:
 
-1. Modern function syntax: arrows, defaults, rest, and spread in the required tasks.
+1. Modern function syntax: learner-written arrows and array spread for tag copies.
+   Keep the supplied default parameters and rest parameter when refactoring;
+   spread into calls is already supplied in `filterExpenses`.
 2. Higher-order functions and callbacks: filter factories, composition, and subscriptions.
 3. Array methods: `map`, `filter`, `reduce`, `find`, `some`, and `every` in their assigned roles.
 4. Closure-based private state: independent tags and stores with defensive copies.
-5. Classes: inheritance, accessors, private amount state, and validated subclasses.
+5. Classes: inheritance, accessors, private amount state, static currency, and validated subclasses.
 6. `this` binding: the view callback retains its receiver.
 7. Behavior composition: tags attach without losing expense class behavior.
 8. Modules: actual tag extraction, at least three modules, and named/default exports.
